@@ -1,0 +1,42 @@
+# TuneTrail ML Engine - Python Dependencies
+# Updated: September 2025
+
+# Deep Learning
+torch==2.5.1
+torch-geometric==2.6.1
+torchvision==0.20.1
+lightning==2.4.0
+
+# ML Libraries
+scikit-learn==1.5.2
+numpy==2.1.2
+scipy==1.14.1
+pandas==2.2.3
+
+# Audio Processing
+librosa==0.10.2.post1
+essentia-tensorflow==2.1b6.dev1110
+soundfile==0.12.1
+audioread==3.0.1
+
+# Vector Operations
+faiss-cpu==1.9.0
+annoy==1.17.3
+
+# Model Serving
+onnx==1.17.0
+onnxruntime==1.19.2
+
+# Utilities
+python-dotenv==1.0.1
+pyyaml==6.0.2
+tqdm==4.66.5
+
+# Database
+asyncpg==0.29.0
+redis==5.1.1
+
+# Development
+pytest==8.3.3
+jupyter==1.1.1
+tensorboard==2.18.0

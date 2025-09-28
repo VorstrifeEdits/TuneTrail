@@ -1,0 +1,21 @@
+# Ruff configuration for TuneTrail
+# https://docs.astral.sh/ruff/configuration/
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "B", "C4", "UP", "N", "S", "T20", "RET", "SIM", "ARG"]
+ignore = [
+    "E501",   # line too long
+    "S101",   # use of assert
+    "S311",   # pseudo-random generators
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"tests/**/*.py" = ["S101", "ARG001"]
+
+[lint.isort]
+known-first-party = ["core", "services"]
+combine-as-imports = true

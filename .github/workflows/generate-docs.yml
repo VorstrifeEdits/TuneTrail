@@ -1,0 +1,118 @@
+name: Generate API Documentation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/api/**'
+      - '.github/workflows/generate-docs.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          cd services/api
+          pip install -r requirements.txt
+
+      - name: Start API server
+        run: |
+          cd services/api
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+
+      - name: Download OpenAPI spec
+        run: |
+          curl -o openapi.json http://localhost:8000/openapi.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate ReDoc documentation
+        run: |
+          npx @redocly/cli build-docs openapi.json \
+            --output docs/api-reference/index.html \
+            --title "TuneTrail API Documentation"
+
+      - name: Generate Markdown documentation
+        run: |
+          npx widdershins openapi.json \
+            --language_tabs 'python:Python' 'javascript:JavaScript' 'shell:cURL' \
+            --summary \
+            -o docs/api-reference/API.md
+
+      - name: Upload OpenAPI spec as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: openapi.json
+
+      - name: Upload documentation as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation
+          path: docs/api-reference/
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/api-reference
+          destination_dir: api-reference
+
+  generate-sdks:
+    runs-on: ubuntu-latest
+    needs: generate-docs
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        language: [python, typescript, go]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download OpenAPI spec
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
+
+      - name: Generate ${{ matrix.language }} SDK
+        run: |
+          mkdir -p sdks/${{ matrix.language }}
+          docker run --rm \
+            -v ${PWD}:/local \
+            openapitools/openapi-generator-cli generate \
+            -i /local/openapi.json \
+            -g ${{ matrix.language }} \
+            -o /local/sdks/${{ matrix.language }}
+
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-${{ matrix.language }}
+          path: sdks/${{ matrix.language }}/
+
+  notify-docs-updated:
+    runs-on: ubuntu-latest
+    needs: [generate-docs, generate-sdks]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Send notification
+        run: |
+          echo "📚 API documentation has been updated!"
+          echo "View at: https://docs.tunetrail.dev/api-reference"

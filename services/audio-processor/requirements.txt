@@ -1,0 +1,45 @@
+# TuneTrail Audio Processor - Python Dependencies
+# Updated: September 2025
+
+# Audio Processing
+librosa==0.10.2.post1
+essentia-tensorflow==2.1b6.dev1110
+soundfile==0.12.1
+audioread==3.0.1
+pydub==0.25.1
+resampy==0.4.3
+
+# Scientific Computing
+numpy==2.1.2
+scipy==1.14.1
+
+# Feature Extraction
+madmom==0.16.1
+pyAudioAnalysis==0.3.14
+
+# Task Queue
+celery[redis]==5.4.0
+redis==5.1.1
+
+# Storage
+boto3==1.35.34
+minio==7.2.9
+
+# API
+fastapi==0.115.0
+uvicorn[standard]==0.31.0
+pydantic==2.9.2
+
+# Database
+asyncpg==0.29.0
+sqlalchemy==2.0.35
+
+# Utilities
+python-dotenv==1.0.1
+aiofiles==24.1.0
+tqdm==4.66.5
+
+# Development
+pytest==8.3.3
+black==24.8.0
+ruff==0.6.9

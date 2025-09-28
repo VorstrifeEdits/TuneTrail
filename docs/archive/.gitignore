@@ -1,0 +1,4 @@
+# Archive directory - not tracked in git
+# Contains planning documents and internal notes
+*
+!.gitignore

@@ -1,0 +1,36 @@
+version: '3.9'
+
+# Development overrides for hot reload and debugging
+
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile.dev
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./services/api:/app
+      - ./core:/app/core
+
+  ml-engine:
+    volumes:
+      - ./services/ml-engine:/app
+      - ./core:/app/core
+
+  audio-processor:
+    volumes:
+      - ./services/audio-processor:/app
+      - ./core:/app/core
+
+  frontend:
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
+
+  celery-worker:
+    command: celery -A processor worker --loglevel=debug --concurrency=2 --reload
