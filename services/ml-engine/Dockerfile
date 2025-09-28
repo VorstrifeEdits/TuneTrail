@@ -18,10 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Create model cache directory
-RUN mkdir -p /models
+# Create model directories
+RUN mkdir -p /models/free /models/starter /models/pro /models/enterprise /models/faiss_indexes
 
 EXPOSE 8001
 
 # Run the ML engine service
-CMD ["python", "engine.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
