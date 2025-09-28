@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from database import get_db
 from models.user import User, UserCreate, UserLogin, UserResponse
@@ -9,6 +9,7 @@ from models.organization import Organization
 from middleware.auth import create_access_token, get_current_user
 from config import settings
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -63,14 +64,38 @@ async def register(
         db.add(org)
         await db.flush()
 
-    # Create user
+    # Validate consent
+    if not user_data.terms_accepted or not user_data.privacy_accepted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Must accept terms of service and privacy policy",
+        )
+
+    # Create user with enhanced fields
     user = User(
         email=user_data.email,
         username=user_data.username,
-        full_name=user_data.full_name,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name,
+        display_name=user_data.display_name or user_data.first_name,
+        full_name=f"{user_data.first_name} {user_data.last_name}",
+        country_code=user_data.country_code,
+        language_code=user_data.language_code,
+        timezone=user_data.timezone,
+        marketing_emails_consent=user_data.marketing_consent or False,
+        terms_accepted_at=datetime.utcnow(),
+        onboarding_step="preferences",
         org_id=org.id,
         role="user",
     )
+
+    if user_data.birth_date:
+        try:
+            from dateutil import parser
+            user.birth_date = parser.parse(user_data.birth_date)
+        except:
+            pass
+
     user.set_password(user_data.password)
 
     db.add(user)

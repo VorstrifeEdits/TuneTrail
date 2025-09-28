@@ -26,6 +26,8 @@ from routers.public import (
     albums,
     artists,
     ml_recommendations,
+    onboarding,
+    security,
 )
 # from routers.premium import advanced_ml, webhooks
 # from routers.admin import dashboard
@@ -245,6 +247,8 @@ async def add_process_time_header(request: Request, call_next):
 # Include routers
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(password.router, prefix="/api/v1")
+app.include_router(security.router, prefix="/api/v1")
+app.include_router(onboarding.router, prefix="/api/v1")
 app.include_router(api_keys.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(tracks.router, prefix="/api/v1")
