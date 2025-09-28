@@ -29,6 +29,7 @@ class Organization(Base):
     users = relationship("User", back_populates="organization")
     api_keys = relationship("APIKey", back_populates="organization")
     tracks = relationship("Track", back_populates="organization")
+    playlists = relationship("Playlist", back_populates="organization")
 
 
 # Pydantic schemas

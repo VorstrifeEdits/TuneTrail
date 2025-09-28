@@ -35,6 +35,8 @@ class User(Base):
     # Relationships
     organization = relationship("Organization", back_populates="users")
     api_keys = relationship("APIKey", back_populates="user")
+    playlists = relationship("Playlist", back_populates="user")
+    interactions = relationship("Interaction", back_populates="user")
 
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""

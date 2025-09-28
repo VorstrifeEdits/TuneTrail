@@ -33,6 +33,7 @@ class Track(Base):
 
     # Relationships
     organization = relationship("Organization", back_populates="tracks")
+    interactions = relationship("Interaction", back_populates="track")
 
 
 # Pydantic schemas
