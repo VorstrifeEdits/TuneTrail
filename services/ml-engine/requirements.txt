@@ -15,7 +15,7 @@ pandas==2.2.3
 
 # Audio Processing
 librosa==0.10.2.post1
-essentia-tensorflow==2.1b6.dev1110
+essentia-tensorflow==2.1b6.dev1389
 soundfile==0.12.1
 audioread==3.0.1
 

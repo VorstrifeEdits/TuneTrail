@@ -40,7 +40,7 @@ class APIKey(Base):
 
     ip_whitelist = Column(ARRAY(Text), nullable=True)
     user_agent_whitelist = Column(ARRAY(Text), nullable=True)
-    metadata = Column(JSON, default={})
+    extra_metadata = Column(JSON, default={})
 
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -107,7 +107,7 @@ class APIKeyCreate(BaseModel):
     rate_limit_requests_per_day: int = Field(default=10000, ge=1, le=1000000)
 
     ip_whitelist: Optional[List[str]] = None
-    metadata: dict = Field(default_factory=dict)
+    extra_metadata: dict = Field(default_factory=dict)
 
     @validator("environment")
     def validate_environment(cls, v: str) -> str:
@@ -161,7 +161,7 @@ class APIKeyUpdate(BaseModel):
     rate_limit_requests_per_day: Optional[int] = Field(None, ge=1, le=1000000)
 
     ip_whitelist: Optional[List[str]] = None
-    metadata: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
 
 
 class APIKeyUsageStats(BaseModel):

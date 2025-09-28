@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 import os
 
 
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # Security
     JWT_SECRET: str
-    API_KEY: str
+    API_KEY: Optional[str] = None
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -35,10 +35,10 @@ class Settings(BaseSettings):
 
     # Storage
     STORAGE_TYPE: str = "minio"
-    S3_ENDPOINT: str
-    S3_ACCESS_KEY: str
-    S3_SECRET_KEY: str
-    S3_BUCKET: str
+    S3_ENDPOINT: Optional[str] = None
+    S3_ACCESS_KEY: Optional[str] = None
+    S3_SECRET_KEY: Optional[str] = None
+    S3_BUCKET: Optional[str] = None
     S3_REGION: str = "us-east-1"
 
     # ML Configuration

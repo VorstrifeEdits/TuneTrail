@@ -56,7 +56,7 @@ async def create_api_key(
         rate_limit_requests_per_day=key_data.rate_limit_requests_per_day,
         expires_at=expires_at,
         ip_whitelist=key_data.ip_whitelist,
-        metadata=key_data.metadata,
+        extra_metadata=key_data.extra_metadata,
     )
 
     db.add(api_key)
@@ -237,7 +237,7 @@ async def rotate_api_key(
         rate_limit_requests_per_day=old_key.rate_limit_requests_per_day,
         expires_at=old_key.expires_at,
         ip_whitelist=old_key.ip_whitelist,
-        metadata=old_key.metadata,
+        extra_metadata=old_key.extra_metadata,
     )
 
     # Revoke old key

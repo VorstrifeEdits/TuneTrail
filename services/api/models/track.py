@@ -26,7 +26,7 @@ class Track(Base):
     audio_url = Column(Text, nullable=True)
     cover_url = Column(Text, nullable=True)
 
-    metadata = Column(JSON, default={})
+    extra_metadata = Column(JSON, default={})
 
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -48,14 +48,14 @@ class TrackBase(BaseModel):
 class TrackCreate(TrackBase):
     audio_url: Optional[str] = None
     cover_url: Optional[str] = None
-    metadata: dict = Field(default_factory=dict)
+    extra_metadata: dict = Field(default_factory=dict)
 
 
 class TrackResponse(TrackBase):
     id: UUID
     audio_url: Optional[str]
     cover_url: Optional[str]
-    metadata: dict
+    extra_metadata: dict
     created_at: datetime
     updated_at: datetime
 
@@ -72,4 +72,4 @@ class TrackUpdate(BaseModel):
     release_year: Optional[int] = Field(None, ge=1900, le=2100)
     audio_url: Optional[str] = None
     cover_url: Optional[str] = None
-    metadata: Optional[dict] = None
+    extra_metadata: Optional[dict] = None

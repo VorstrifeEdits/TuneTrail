@@ -19,7 +19,7 @@ class Organization(Base):
     max_tracks = Column(Integer, default=1000)
     max_users = Column(Integer, default=1)
     features = Column(JSON, default={})
-    metadata = Column(JSON, default={})
+    extra_metadata = Column(JSON, default={})
 
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)

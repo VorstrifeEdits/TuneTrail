@@ -128,7 +128,7 @@ async def authenticate_with_api_key(key: str, db: AsyncSession) -> User:
 
 
 async def get_current_user_optional(
-    credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(lambda: None),
     db: AsyncSession = Depends(get_db),
 ) -> Optional[User]:
     """
