@@ -30,6 +30,8 @@ class Organization(Base):
     api_keys = relationship("APIKey", back_populates="organization")
     tracks = relationship("Track", back_populates="organization")
     playlists = relationship("Playlist", back_populates="organization")
+    albums = relationship("Album", back_populates="organization")
+    artists = relationship("Artist", back_populates="organization")
 
 
 # Pydantic schemas

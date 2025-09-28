@@ -37,6 +37,11 @@ class User(Base):
     api_keys = relationship("APIKey", back_populates="user")
     playlists = relationship("Playlist", back_populates="user")
     interactions = relationship("Interaction", back_populates="user")
+    player_state = relationship("PlayerState", back_populates="user", uselist=False)
+    queue_items = relationship("Queue", back_populates="user")
+    listening_sessions = relationship("ListeningSession", back_populates="user")
+    saved_albums = relationship("SavedAlbum", back_populates="user")
+    followed_artists = relationship("ArtistFollow", back_populates="user")
 
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""

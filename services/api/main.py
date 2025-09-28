@@ -21,6 +21,11 @@ from routers.public import (
     users,
     password,
     browse,
+    player,
+    sessions,
+    albums,
+    artists,
+    ml_recommendations,
 )
 # from routers.premium import advanced_ml, webhooks
 # from routers.admin import dashboard
@@ -243,11 +248,16 @@ app.include_router(password.router, prefix="/api/v1")
 app.include_router(api_keys.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(tracks.router, prefix="/api/v1")
+app.include_router(albums.router, prefix="/api/v1")
+app.include_router(artists.router, prefix="/api/v1")
 app.include_router(playlists.router, prefix="/api/v1")
 app.include_router(interactions.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
+app.include_router(ml_recommendations.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
 app.include_router(browse.router, prefix="/api/v1")
+app.include_router(player.router, prefix="/api/v1")
+app.include_router(sessions.router, prefix="/api/v1")
 
 
 # Health check endpoint

@@ -17,7 +17,9 @@ class Track(Base):
 
     title = Column(String(500), nullable=False)
     artist = Column(String(500), nullable=True, index=True)
+    artist_id = Column(PGUUID(as_uuid=True), ForeignKey("artists.id", ondelete="SET NULL"), nullable=True, index=True)
     album = Column(String(500), nullable=True)
+    album_id = Column(PGUUID(as_uuid=True), ForeignKey("albums.id", ondelete="SET NULL"), nullable=True, index=True)
     genre = Column(String(100), nullable=True, index=True)
     duration_seconds = Column(Integer, nullable=True)
     release_year = Column(Integer, nullable=True)
