@@ -10,7 +10,18 @@ from config import settings
 from database import engine, Base
 
 # Import routers
-from routers.public import api_keys, auth, tracks, playlists, interactions, recommendations
+from routers.public import (
+    api_keys,
+    auth,
+    tracks,
+    playlists,
+    interactions,
+    recommendations,
+    search,
+    users,
+    password,
+    browse,
+)
 # from routers.premium import advanced_ml, webhooks
 # from routers.admin import dashboard
 
@@ -228,11 +239,15 @@ async def add_process_time_header(request: Request, call_next):
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(password.router, prefix="/api/v1")
 app.include_router(api_keys.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
 app.include_router(tracks.router, prefix="/api/v1")
 app.include_router(playlists.router, prefix="/api/v1")
 app.include_router(interactions.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
+app.include_router(search.router, prefix="/api/v1")
+app.include_router(browse.router, prefix="/api/v1")
 
 
 # Health check endpoint

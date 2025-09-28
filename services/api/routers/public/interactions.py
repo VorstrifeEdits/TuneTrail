@@ -49,13 +49,29 @@ async def record_interaction(
             detail="Track not found",
         )
 
+    enriched_context = {
+        **interaction_data.context,
+        "session_id": str(interaction_data.session_id) if interaction_data.session_id else None,
+        "device_type": interaction_data.device_type,
+        "platform": interaction_data.platform,
+        "source": interaction_data.source,
+        "source_id": str(interaction_data.source_id) if interaction_data.source_id else None,
+        "mood": interaction_data.mood,
+        "activity": interaction_data.activity,
+        "skip_reason": interaction_data.skip_reason,
+        "shuffle_enabled": interaction_data.shuffle_enabled,
+        "repeat_mode": interaction_data.repeat_mode,
+        "volume_level": interaction_data.volume_level,
+    }
+    enriched_context = {k: v for k, v in enriched_context.items() if v is not None}
+
     interaction = Interaction(
         user_id=current_user.id,
         track_id=interaction_data.track_id,
         interaction_type=interaction_data.interaction_type.value,
         rating=interaction_data.rating,
         play_duration_seconds=interaction_data.play_duration_seconds,
-        context=interaction_data.context,
+        context=enriched_context,
     )
 
     db.add(interaction)

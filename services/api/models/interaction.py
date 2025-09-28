@@ -56,10 +56,55 @@ class InteractionCreate(BaseModel):
     play_duration_seconds: Optional[int] = Field(
         None, ge=0, example=180, description="Duration of play in seconds"
     )
+
+    session_id: Optional[UUID] = Field(None, description="Listening session ID (group related plays)")
+    device_type: Optional[str] = Field(
+        None,
+        pattern="^(mobile|desktop|web|tablet|car|smart_speaker|tv)$",
+        example="mobile",
+        description="Device type",
+    )
+    platform: Optional[str] = Field(
+        None,
+        example="iOS",
+        description="Platform: iOS, Android, Windows, Mac, Linux, Web",
+    )
+    source: Optional[str] = Field(
+        None,
+        pattern="^(playlist|search|recommendations|radio|artist_page|album_page|queue|library)$",
+        example="playlist",
+        description="Where was track played from",
+    )
+    source_id: Optional[UUID] = Field(None, description="ID of source playlist/recommendation")
+
+    mood: Optional[str] = Field(
+        None,
+        pattern="^(happy|sad|energetic|calm|focused|relaxed|angry|romantic|melancholic)$",
+        example="energetic",
+        description="User's mood when playing",
+    )
+    activity: Optional[str] = Field(
+        None,
+        pattern="^(workout|study|sleep|commute|party|work|cooking|cleaning|relaxing)$",
+        example="workout",
+        description="User's activity",
+    )
+    skip_reason: Optional[str] = Field(
+        None,
+        pattern="^(dont_like|wrong_mood|heard_too_much|bad_quality|inappropriate|other)$",
+        description="Why user skipped (if type=skip)",
+    )
+
+    shuffle_enabled: Optional[bool] = Field(None, description="Was shuffle on")
+    repeat_mode: Optional[str] = Field(
+        None, pattern="^(off|one|all)$", description="Repeat mode"
+    )
+    volume_level: Optional[int] = Field(None, ge=0, le=100, description="Volume level 0-100")
+
     context: dict = Field(
         default_factory=dict,
-        example={"source": "playlist", "playlist_id": "123"},
-        description="Additional context about the interaction",
+        example={"custom_field": "value"},
+        description="Additional custom context",
     )
 
 
