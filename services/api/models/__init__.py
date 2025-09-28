@@ -9,6 +9,7 @@ from .interaction import Interaction
 from .player import PlayerState, Queue, ListeningSession
 from .album import Album, Artist, SavedAlbum, ArtistFollow
 from .audio_features import AudioFeatures
+from .tracking import SearchQuery, RecommendationImpression, ContentView, PlayerEvent
 
 __all__ = [
     "User",
@@ -26,4 +27,8 @@ __all__ = [
     "SavedAlbum",
     "ArtistFollow",
     "AudioFeatures",
+    "SearchQuery",
+    "RecommendationImpression",
+    "ContentView",
+    "PlayerEvent",
 ]

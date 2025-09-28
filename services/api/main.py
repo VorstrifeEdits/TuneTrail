@@ -29,6 +29,7 @@ from routers.public import (
     onboarding,
     security,
     audio,
+    tracking,
 )
 from routers.premium import analytics
 # from routers.admin import dashboard
@@ -264,6 +265,7 @@ app.include_router(browse.router, prefix="/api/v1")
 app.include_router(player.router, prefix="/api/v1")
 app.include_router(sessions.router, prefix="/api/v1")
 app.include_router(audio.router, prefix="/api/v1")
+app.include_router(tracking.router, prefix="/api/v1")
 
 # Include routers - Premium (Pro+ features)
 app.include_router(analytics.router, prefix="/api/v1")

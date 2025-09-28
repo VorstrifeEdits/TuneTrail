@@ -9,6 +9,7 @@ from database import get_db
 from models.user import User
 from models.track import Track, TrackResponse
 from models.playlist import Playlist, PlaylistSummary
+from models.tracking import SearchQuery
 from middleware.auth import get_current_user
 
 router = APIRouter(prefix="/search", tags=["Search"])
@@ -225,6 +226,16 @@ async def search(
                 )
             )
         results.total_results += len(results.albums)
+
+    # Auto-log search query for ML
+    search_log = SearchQuery(
+        user_id=current_user.id,
+        query=q,
+        search_type=search_type,
+        results_count=results.total_results,
+    )
+    db.add(search_log)
+    await db.commit()
 
     return results
 
