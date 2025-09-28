@@ -16,6 +16,7 @@ from models.api_key import (
 )
 from models.user import User
 from middleware.auth import get_current_user, require_scopes
+from middleware.tier import require_plan, PlanTier
 
 router = APIRouter(prefix="/api-keys", tags=["API Keys"])
 
@@ -255,7 +256,11 @@ async def rotate_api_key(
     return response
 
 
-@router.get("/{key_id}/usage", response_model=APIKeyUsageStats)
+@router.get(
+    "/{key_id}/usage",
+    response_model=APIKeyUsageStats,
+    dependencies=[Depends(require_plan([PlanTier.PRO, PlanTier.ENTERPRISE]))],
+)
 async def get_api_key_usage(
     key_id: UUID,
     current_user: User = Depends(get_current_user),

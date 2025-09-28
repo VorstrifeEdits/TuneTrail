@@ -28,8 +28,9 @@ from routers.public import (
     ml_recommendations,
     onboarding,
     security,
+    audio,
 )
-# from routers.premium import advanced_ml, webhooks
+from routers.premium import analytics
 # from routers.admin import dashboard
 
 
@@ -244,7 +245,7 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-# Include routers
+# Include routers - Public (all tiers)
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(password.router, prefix="/api/v1")
 app.include_router(security.router, prefix="/api/v1")
@@ -262,6 +263,10 @@ app.include_router(search.router, prefix="/api/v1")
 app.include_router(browse.router, prefix="/api/v1")
 app.include_router(player.router, prefix="/api/v1")
 app.include_router(sessions.router, prefix="/api/v1")
+app.include_router(audio.router, prefix="/api/v1")
+
+# Include routers - Premium (Pro+ features)
+app.include_router(analytics.router, prefix="/api/v1")
 
 
 # Health check endpoint

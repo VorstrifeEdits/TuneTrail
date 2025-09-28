@@ -12,6 +12,7 @@ from models.track import Track, TrackResponse
 from models.interaction import Interaction
 from models.playlist import Playlist
 from middleware.auth import get_current_user
+from middleware.tier import require_plan, PlanTier
 
 router = APIRouter(prefix="/ml", tags=["ML Recommendations"])
 
@@ -132,7 +133,11 @@ async def submit_recommendation_feedback(
     }
 
 
-@router.get("/daily-mix", response_model=List[dict])
+@router.get(
+    "/daily-mix",
+    response_model=List[dict],
+    dependencies=[Depends(require_plan([PlanTier.STARTER, PlanTier.PRO, PlanTier.ENTERPRISE]))],
+)
 async def get_daily_mix(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -201,7 +206,11 @@ async def get_daily_mix(
     return mixes
 
 
-@router.post("/radio", response_model=List[TrackResponse])
+@router.post(
+    "/radio",
+    response_model=List[TrackResponse],
+    dependencies=[Depends(require_plan([PlanTier.STARTER, PlanTier.PRO, PlanTier.ENTERPRISE]))],
+)
 async def generate_radio(
     radio_params: RadioParams,
     current_user: User = Depends(get_current_user),
@@ -250,7 +259,11 @@ async def generate_radio(
     return []
 
 
-@router.get("/taste-profile", response_model=TasteProfile)
+@router.get(
+    "/taste-profile",
+    response_model=TasteProfile,
+    dependencies=[Depends(require_plan([PlanTier.PRO, PlanTier.ENTERPRISE]))],
+)
 async def get_taste_profile(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
