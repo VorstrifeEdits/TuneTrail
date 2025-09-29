@@ -78,6 +78,7 @@ services:
       - S3_ACCESS_KEY=${S3_ACCESS_KEY:-minioadmin}
       - S3_SECRET_KEY=${S3_SECRET_KEY:-change_me_minio_password}
       - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_minimum_32_characters_long}
+      - ML_ENGINE_URL=http://ml-engine:8001
       - EDITION=community
       - ENVIRONMENT=${ENVIRONMENT:-development}
     volumes:
@@ -90,6 +91,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ml-engine:
+        condition: service_started
     networks:
       - tunetrail-network
     restart: unless-stopped
@@ -110,6 +113,8 @@ services:
       - ./services/ml-engine:/app
       - model_cache:/models
       - audio_features:/features
+    ports:
+      - "8001:8001"
     depends_on:
       postgres:
         condition: service_healthy

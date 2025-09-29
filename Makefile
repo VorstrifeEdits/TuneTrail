@@ -125,3 +125,57 @@ health: ## Check service health
 	@echo '$(BLUE)Checking service health...$(NC)'
 	@curl -s http://localhost:8000/health | jq . || echo "API not responding"
 	@curl -s http://localhost:3000 > /dev/null && echo "$(GREEN)✓ Frontend responding$(NC)" || echo "Frontend not responding"
+	@curl -s http://localhost:8001/health | jq . || echo "ML Engine not responding"
+
+# ML Engine Commands
+ml-train: ## Train all ML models
+	@echo '$(BLUE)Training all ML models...$(NC)'
+	docker-compose exec ml-engine python scripts/train_all_models.py --tier all --evaluate
+	@echo '$(GREEN)✓ ML training complete$(NC)'
+
+ml-train-free: ## Train free tier models only
+	@echo '$(BLUE)Training free tier models...$(NC)'
+	docker-compose exec ml-engine python scripts/train_all_models.py --tier free
+	@echo '$(GREEN)✓ Free tier training complete$(NC)'
+
+ml-train-starter: ## Train starter tier models
+	@echo '$(BLUE)Training starter tier models...$(NC)'
+	docker-compose exec ml-engine python scripts/train_all_models.py --tier starter
+	@echo '$(GREEN)✓ Starter tier training complete$(NC)'
+
+ml-train-pro: ## Train pro tier models
+	@echo '$(BLUE)Training pro tier models...$(NC)'
+	docker-compose exec ml-engine python scripts/train_all_models.py --tier pro
+	@echo '$(GREEN)✓ Pro tier training complete$(NC)'
+
+ml-evaluate: ## Evaluate all trained models
+	@echo '$(BLUE)Evaluating ML models...$(NC)'
+	docker-compose exec ml-engine python scripts/evaluate_models.py
+	@echo '$(GREEN)✓ Model evaluation complete$(NC)'
+
+ml-ingest-fma: ## Download and ingest FMA small dataset
+	@echo '$(BLUE)Ingesting FMA dataset...$(NC)'
+	docker-compose exec ml-engine python scripts/ingest_dataset.py fma --subset small --extract-features
+	@echo '$(GREEN)✓ FMA dataset ingested$(NC)'
+
+ml-build-index: ## Build FAISS similarity indexes
+	@echo '$(BLUE)Building FAISS indexes...$(NC)'
+	docker-compose exec ml-engine python scripts/build_faiss_index.py --gpu
+	@echo '$(GREEN)✓ FAISS indexes built$(NC)'
+
+ml-status: ## Check ML engine status and loaded models
+	@echo '$(BLUE)ML Engine Status:$(NC)'
+	@curl -s http://localhost:8001/models/info | jq . || echo "ML Engine not responding"
+
+shell-ml: ## Open shell in ML engine container
+	docker-compose exec ml-engine /bin/bash
+
+ml-setup: ## Check ML training readiness and setup
+	@echo '$(BLUE)Checking ML training setup...$(NC)'
+	docker-compose exec ml-engine python scripts/setup_training.py --check-data
+	@echo '$(GREEN)✓ ML setup check complete$(NC)'
+
+ml-sample-data: ## Create sample data for testing (development only)
+	@echo '$(BLUE)Creating sample data...$(NC)'
+	docker-compose exec ml-engine python scripts/setup_training.py --create-sample
+	@echo '$(GREEN)✓ Sample data created$(NC)'

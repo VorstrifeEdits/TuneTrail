@@ -13,6 +13,7 @@ from models.interaction import Interaction
 from models.playlist import Playlist
 from middleware.auth import get_current_user
 from middleware.tier import require_plan, PlanTier
+from services.ml_client import ml_client
 
 router = APIRouter(prefix="/ml", tags=["ML Recommendations"])
 
@@ -144,25 +145,60 @@ async def get_daily_mix(
     mix_count: int = Query(6, ge=1, le=10),
 ) -> List[dict]:
     """
-    Generate daily mixes (like Spotify).
+    Generate daily mixes using ML engine.
 
-    **Algorithm:**
-    - Analyze user's top genres
-    - Create genre-focused mixes
-    - Mix familiar + discovery (80/20 split)
-    - Refresh daily
-
-    **Beyond Spotify:**
-    - Mood-based mixes (energetic, calm, focused)
-    - Activity-based (workout, study, sleep)
-    - Time-aware (morning mix, evening mix)
-    - Collaborative mixes (what friends listen to)
+    **Enhanced ML Algorithm:**
+    - Analyze user's listening patterns with collaborative filtering
+    - Create genre-focused mixes with optimal familiar/discovery ratio
+    - Use audio similarity for track selection within genres
+    - Refresh daily with time-aware recommendations
 
     **ML Models Used:**
-    - Collaborative filtering for discovery
-    - Content-based for similarity
-    - Temporal patterns for timing
+    - Daily Mix Generator: 80/20 familiar/discovery split
+    - Genre-Based Model: User genre preferences from interaction history
+    - Content-Based: Audio similarity for track variety within mixes
+    - Collaborative Filtering: Discovery tracks from similar users
+
+    **Starter+ Feature**
     """
+    # Try ML engine first
+    ml_mixes = await ml_client.generate_daily_mixes(
+        user_id=current_user.id,
+        user=current_user,
+        mix_count=mix_count,
+        tracks_per_mix=50
+    )
+
+    # If ML engine returns mixes, convert them
+    if ml_mixes:
+        converted_mixes = []
+        for ml_mix in ml_mixes:
+            # Get track objects from database
+            track_objects = []
+            for track_id in ml_mix.get('tracks', [])[:10]:  # Show first 10
+                track_result = await db.execute(
+                    select(Track).where(Track.id == track_id)
+                )
+                track = track_result.scalar_one_or_none()
+                if track:
+                    track_objects.append(TrackResponse.from_orm(track))
+
+            converted_mixes.append({
+                "mix_id": ml_mix['mix_id'],
+                "name": ml_mix['name'],
+                "description": ml_mix['description'],
+                "tracks": track_objects,
+                "total_tracks": ml_mix['total_tracks'],
+                "cover_url": None,
+                "genre": ml_mix.get('genre'),
+                "familiar_ratio": ml_mix.get('familiar_ratio', 0.8),
+                "model_used": "ml_daily_mix_generator"
+            })
+
+        if converted_mixes:
+            return converted_mixes
+
+    # Fallback to simple genre-based mixes
     top_genres_query = (
         select(Track.genre, func.count(Interaction.id).label("count"))
         .join(Interaction, Interaction.track_id == Track.id)
@@ -201,6 +237,7 @@ async def get_daily_mix(
             "total_tracks": len(genre_tracks),
             "cover_url": None,
             "genre": genre,
+            "model_used": "fallback_genre_mixes"
         })
 
     return mixes
@@ -270,31 +307,49 @@ async def get_taste_profile(
     days: int = Query(180, ge=30, le=365),
 ) -> TasteProfile:
     """
-    Get comprehensive user taste profile.
+    Get comprehensive user taste profile using ML engine.
 
-    **BEYOND SPOTIFY: Deep ML-powered taste analysis**
+    **Deep ML-Powered Taste Analysis (Pro+ Feature):**
 
     **Analyzes:**
-    - Genre preferences with trends
-    - Artist preferences
-    - Temporal patterns (morning vs. evening)
-    - Mood preferences
-    - Audio feature preferences (BPM, energy, etc.)
-    - Diversity metrics
-    - Exploration vs. exploitation ratio
+    - Genre preferences with trends (from interaction history)
+    - Artist preferences and discovery patterns
+    - Temporal patterns (morning vs. evening listening)
+    - Audio feature preferences (BPM, energy, valence)
+    - Diversity metrics and exploration behavior
+    - Mood preferences and context patterns
 
-    **ML Models:**
-    - Clustering for taste segments
-    - Time-series for trend detection
-    - Anomaly detection for taste shifts
-    - Predictive: what user will like next
+    **ML Models Used:**
+    - Taste Profiler: Deep analysis of listening patterns
+    - Audio Feature Analysis: Preferred BPM, energy, valence ranges
+    - Temporal Pattern Detection: Time-of-day listening habits
+    - Diversity Clustering: Music exploration vs. repetition
+    - Predictive Modeling: Genres/artists user will likely enjoy
 
-    **Use Cases:**
-    - Power recommendations
-    - User insights dashboard
-    - Onboarding improvements
-    - A/B testing segments
+    **Pro+ Feature**
     """
+    # Try ML engine first for comprehensive analysis
+    ml_profile = await ml_client.get_taste_profile(
+        user_id=current_user.id,
+        user=current_user
+    )
+
+    if ml_profile:
+        # Convert ML profile to API response format
+        return TasteProfile(
+            user_id=UUID(ml_profile['user_id']),
+            top_genres=ml_profile.get('top_genres', []),
+            top_artists=ml_profile.get('top_artists', []),
+            top_decades=ml_profile.get('top_decades', []),
+            diversity_score=ml_profile.get('diversity_score', 0.5),
+            adventurousness_score=ml_profile.get('adventurousness_score', 0.5),
+            mood_preferences=ml_profile.get('mood_preferences', {}),
+            listening_patterns=ml_profile.get('listening_patterns', {}),
+            predicted_likes=ml_profile.get('predicted_likes', []),
+            audio_preferences=ml_profile.get('audio_preferences', {}),
+        )
+
+    # Fallback to simple analysis
     cutoff_date = datetime.utcnow() - timedelta(days=days)
 
     top_genres_query = (

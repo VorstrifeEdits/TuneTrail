@@ -11,6 +11,7 @@ from models.user import User
 from models.track import Track, TrackResponse
 from models.interaction import Interaction
 from middleware.auth import get_current_user
+from services.ml_client import ml_client
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
@@ -45,21 +46,65 @@ async def get_recommendations(
     """
     Get personalized music recommendations.
 
-    Returns track recommendations based on user's listening history and preferences.
-    This is a basic implementation that will be enhanced with ML models.
+    **Enhanced with ML Engine Integration:**
+    - Free: Collaborative filtering + popularity + genre-based
+    - Starter: + Content-based filtering (audio similarity)
+    - Pro: + Neural collaborative filtering + deep learning
+    - Enterprise: + Custom model training
 
-    **Algorithm (v1 - Simple):**
-    - Find user's favorite genres from interaction history
-    - Find tracks in those genres not yet listened to
-    - Prioritize recent additions
-
-    **Future ML Models:**
-    - Content-based filtering (audio features)
-    - Collaborative filtering (LightGCN)
-    - Neural CF (Pro+)
+    **Models Used:**
+    - Free Tier: ALS collaborative filtering, time-decayed popularity
+    - Starter Tier: FAISS audio similarity, daily mix generation
+    - Pro Tier: Neural CF (PyTorch), deep taste profiling
+    - Enterprise Tier: Custom model training
 
     **Required scopes**: `read:recommendations`
     """
+    # Prepare filters
+    filters = {}
+    if genres:
+        filters['genres'] = genres.split(",")
+
+    # Prepare context
+    context = {
+        'exclude_listened': exclude_listened,
+        'timestamp': datetime.utcnow().isoformat(),
+        'request_source': 'api_recommendations_endpoint'
+    }
+
+    # Try ML engine first
+    ml_recommendations = await ml_client.get_recommendations(
+        user_id=current_user.id,
+        user=current_user,
+        limit=limit,
+        filters=filters,
+        context=context
+    )
+
+    # If ML engine returns recommendations, convert them
+    if ml_recommendations:
+        recommendations = []
+        for ml_rec in ml_recommendations:
+            # Get track data from database
+            track_result = await db.execute(
+                select(Track).where(Track.id == UUID(ml_rec['track_id']))
+            )
+            track = track_result.scalar_one_or_none()
+
+            if track:
+                recommendations.append(
+                    RecommendationResponse(
+                        track=TrackResponse.from_orm(track),
+                        score=ml_rec['score'],
+                        reason=ml_rec['reason'],
+                        model_used=ml_rec['model_used'],
+                    )
+                )
+
+        if recommendations:
+            return recommendations
+
+    # Fallback to simple algorithm if ML engine unavailable
     genre_list = genres.split(",") if genres else None
 
     listened_track_ids = set()
@@ -115,7 +160,7 @@ async def get_recommendations(
                 track=TrackResponse.from_orm(track),
                 score=score,
                 reason=reason,
-                model_used="simple_genre_based_v1",
+                model_used="fallback_genre_based_v1",
             )
         )
 
@@ -132,20 +177,19 @@ async def get_similar_tracks(
     """
     Get tracks similar to a specific track.
 
-    Returns similar tracks based on genre and artist.
-    Will be enhanced with audio feature similarity once ML models are integrated.
+    **Enhanced with ML Engine Integration:**
+    - Free: Basic genre + artist similarity
+    - Starter+: Audio feature similarity (FAISS vector search)
+    - Pro+: Deep audio embeddings + collaborative patterns
 
-    **Current Algorithm:**
-    - Same genre
-    - Same or similar artist
-    - Similar release year
-
-    **Future Enhancement:**
-    - Audio feature vector similarity (cosine distance)
-    - Collaborative filtering patterns
+    **Algorithm:**
+    - Starter+: 512-dimensional audio embedding cosine similarity
+    - Uses FAISS for fast nearest neighbor search
+    - Fallback to genre/artist matching if ML unavailable
 
     **Required scopes**: `read:recommendations`
     """
+    # Verify track exists
     result = await db.execute(
         select(Track).where(
             Track.id == track_id,
@@ -160,6 +204,37 @@ async def get_similar_tracks(
             detail="Track not found",
         )
 
+    # Try ML engine first
+    ml_similar = await ml_client.get_similar_tracks(
+        track_id=track_id,
+        user=current_user,
+        limit=limit
+    )
+
+    # If ML engine returns results, convert them
+    if ml_similar:
+        recommendations = []
+        for ml_rec in ml_similar:
+            # Get track data from database
+            track_result = await db.execute(
+                select(Track).where(Track.id == UUID(ml_rec['track_id']))
+            )
+            track = track_result.scalar_one_or_none()
+
+            if track:
+                recommendations.append(
+                    RecommendationResponse(
+                        track=TrackResponse.from_orm(track),
+                        score=ml_rec['score'],
+                        reason=ml_rec['reason'],
+                        model_used=ml_rec['model_used'],
+                    )
+                )
+
+        if recommendations:
+            return recommendations
+
+    # Fallback to simple similarity if ML engine unavailable
     query = (
         select(Track)
         .where(
@@ -202,7 +277,7 @@ async def get_similar_tracks(
                 track=TrackResponse.from_orm(track),
                 score=score,
                 reason=reason,
-                model_used="simple_similarity_v1",
+                model_used="fallback_similarity_v1",
             )
         )
 

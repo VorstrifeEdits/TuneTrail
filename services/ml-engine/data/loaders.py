@@ -1,5 +1,11 @@
 import asyncpg
 from typing import List, Dict, Tuple
+import sys
+import os
+
+# Add parent directory to path for config import
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from config import Config
 
 
