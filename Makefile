@@ -1,4 +1,4 @@
-.PHONY: help setup up down logs clean test lint format docs sdk
+.PHONY: help quickstart setup up down logs clean test lint format docs sdk
 
 # Colors for terminal output
 BLUE := \033[0;34m
@@ -9,6 +9,10 @@ help: ## Show this help message
 	@echo '$(BLUE)TuneTrail - Available Commands$(NC)'
 	@echo ''
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
+
+quickstart: ## 🚀 Zero-friction setup - complete installation in one command
+	@echo '$(BLUE)🎵 TuneTrail Quickstart - Zero-friction setup$(NC)'
+	@./scripts/quickstart.sh
 
 setup: ## Initial setup - copy .env and install dependencies
 	@echo '$(BLUE)Setting up TuneTrail...$(NC)'
@@ -27,6 +31,14 @@ up: ## Start all services
 dev: ## Start development environment with hot reload
 	@echo '$(BLUE)Starting development environment...$(NC)'
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+prod: ## Start production environment with optimizations
+	@echo '$(BLUE)Starting production environment...$(NC)'
+	docker-compose -f docker-compose.prod.yml up -d
+	@echo '$(GREEN)✓ Production services started$(NC)'
+	@echo 'Frontend: http://localhost:3000'
+	@echo 'API: http://localhost:8000'
+	@echo 'Monitoring: http://localhost:3001'
 
 down: ## Stop all services
 	@echo '$(BLUE)Stopping services...$(NC)'

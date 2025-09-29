@@ -8,6 +8,7 @@ from typing import AsyncGenerator
 
 from config import settings
 from database import engine, Base
+from database_init import initialize_database, get_database_info
 
 # Import routers
 from routers.public import (
@@ -41,13 +42,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Startup
     print("🚀 Starting TuneTrail API...")
 
-    # Create database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Initialize database based on edition
+    db_success = await initialize_database()
+    if not db_success:
+        print("❌ Database initialization failed")
+        return
 
-    print("✅ Database tables created")
+    # Get database info
+    db_info = await get_database_info()
+    print(f"✅ Database initialized ({db_info['table_count']} tables)")
     print(f"📍 Edition: {settings.EDITION}")
     print(f"🌍 Environment: {settings.ENVIRONMENT}")
+    print(f"🗄️  Init Method: {db_info['initialization_method']}")
+    if db_info['migration_version']:
+        print(f"📋 Migration: {db_info['migration_version']}")
 
     yield
 

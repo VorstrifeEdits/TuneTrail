@@ -39,40 +39,42 @@ TuneTrail is a production-ready music recommendation system combining state-of-t
 | ML Models | Basic | + Collaborative | + Neural CF | + Custom |
 | Support | Community | Email | Priority | Dedicated |
 
-## 🚀 Quick Start
+## 🚀 Zero-Friction Setup
 
 ### Prerequisites
-- Docker 24.0+
-- Docker Compose v2.20+
-- 8GB+ RAM
-- 50GB+ free disk space
+- Docker 24.0+ & Docker Compose v2.20+
+- 8GB+ RAM, 50GB+ disk space
 
-### Installation (5 minutes)
+### One-Command Installation ⚡
 
 ```bash
-# Clone the repository
+# Clone and start everything in one command
 git clone https://github.com/yourusername/tunetrail.git
 cd tunetrail
-
-# Copy environment file
-cp .env.example .env
-
-# Edit .env with your configuration (optional for dev)
-# nano .env
-
-# Start all services
-make up
-# or: docker-compose up -d
-
-# Check service health
-make health
+make quickstart
 ```
 
-### Access Points
-- **Frontend**: http://localhost:3000
-- **API Docs**: http://localhost:8000/docs
-- **API (Interactive)**: http://localhost:8000/redoc
-- **MinIO Console**: http://localhost:9001
+**That's it!** The script will:
+- ✅ Check prerequisites
+- ✅ Generate secure passwords
+- ✅ Start all services with health checks
+- ✅ Initialize database with extensions
+- ✅ Create MinIO storage buckets
+- ✅ Display access URLs
+
+### Access Your TuneTrail Instance
+- **🎵 Frontend**: http://localhost:3000
+- **📊 API Docs**: http://localhost:8000/docs
+- **🔄 Interactive API**: http://localhost:8000/redoc
+- **💾 Storage Console**: http://localhost:9001
+
+### Alternative Setup (Manual)
+```bash
+# Traditional setup if you prefer manual control
+cp .env.example .env    # Edit if needed
+make up                 # Start services
+make health            # Check status
+```
 
 ## 📦 Tech Stack
 
@@ -159,11 +161,15 @@ make db-shell      # Open PostgreSQL shell
 
 ## 📚 Documentation
 
+### Getting Started
+- **[🚀 Quickstart Guide](docs/QUICKSTART.md)** - Get running in 1 minute
+- **[🏗️ Scaling Guide](docs/SCALING.md)** - Production deployment and scaling
+
+### Technical Guides
 - [Implementation Guide](IMPLEMENTATION_GUIDE.md) - Complete setup guide
 - [API Keys Guide](docs/API_KEYS.md) - API key management
 - [Community Portal](docs/COMMUNITY_PORTAL.md) - Portal architecture
 - [Automated Docs](docs/AUTOMATED_DOCUMENTATION.md) - Documentation system
-- [Documentation Strategy](docs/DOCUMENTATION_STRATEGY.md) - Public vs private docs
 
 ## 🎯 Current Status
 

@@ -1,5 +1,5 @@
-# TuneTrail Community Edition - Docker Compose
-# For development and self-hosted deployment
+# TuneTrail Core Services - Minimal setup for initial testing
+# Use: docker-compose -f docker-compose.core.yml up -d
 
 services:
   # PostgreSQL with pgvector extension
@@ -91,13 +91,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      ml-engine:
-        condition: service_started
     networks:
       - tunetrail-network
     restart: unless-stopped
 
-  # ML Engine for recommendations
+  # ML Engine for recommendations (simplified)
   ml-engine:
     build:
       context: ./services/ml-engine
@@ -124,7 +122,7 @@ services:
       - tunetrail-network
     restart: unless-stopped
 
-  # Audio Processor for feature extraction
+  # Audio Processor Service
   audio-processor:
     build:
       context: ./services/audio-processor
@@ -132,41 +130,24 @@ services:
     container_name: tunetrail-audio-processor
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-tunetrail}:${POSTGRES_PASSWORD:-change_me_secure_password_123}@postgres:5432/${POSTGRES_DB:-tunetrail_community}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-change_me_redis_password}@redis:6379/1
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-change_me_redis_password}@redis:6379/0
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-change_me_redis_password}@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-change_me_redis_password}@redis:6379/2
       - S3_ENDPOINT=http://minio:9000
       - S3_ACCESS_KEY=${S3_ACCESS_KEY:-minioadmin}
       - S3_SECRET_KEY=${S3_SECRET_KEY:-change_me_minio_password}
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-change_me_redis_password}@redis:6379/1
     volumes:
       - ./services/audio-processor:/app
       - audio_features:/features
+    ports:
+      - "8002:8002"
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       minio:
         condition: service_healthy
-    networks:
-      - tunetrail-network
-    restart: unless-stopped
-
-  # Next.js Frontend
-  frontend:
-    build:
-      context: ./services/frontend
-      dockerfile: Dockerfile
-    container_name: tunetrail-frontend
-    environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
-      - NEXT_PUBLIC_EDITION=community
-    volumes:
-      - ./services/frontend:/app
-      - /app/node_modules
-      - /app/.next
-    ports:
-      - "3000:3000"
-    depends_on:
-      - api
     networks:
       - tunetrail-network
     restart: unless-stopped
@@ -195,18 +176,35 @@ services:
       - tunetrail-network
     restart: unless-stopped
 
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    container_name: tunetrail-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
+      - NEXT_PUBLIC_EDITION=community
+    volumes:
+      - ./services/frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - tunetrail-network
+    restart: unless-stopped
+
 networks:
   tunetrail-network:
     driver: bridge
 
 volumes:
   postgres_data:
-    driver: local
   redis_data:
-    driver: local
   minio_data:
-    driver: local
   model_cache:
-    driver: local
   audio_features:
-    driver: local

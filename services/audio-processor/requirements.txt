@@ -1,6 +1,9 @@
 # TuneTrail Audio Processor - Python Dependencies
 # Updated: September 2025
 
+# Build Dependencies (needed first)
+cython>=0.29.0
+
 # Audio Processing
 librosa==0.10.2.post1
 essentia-tensorflow==2.1b6.dev1389
@@ -13,9 +16,9 @@ resampy==0.4.3
 numpy==2.1.2
 scipy==1.14.1
 
-# Feature Extraction
-madmom==0.16.1
-pyAudioAnalysis==0.3.14
+# Feature Extraction (core)
+# madmom==0.16.1  # Optional - advanced music analysis (requires complex build)
+# pyAudioAnalysis==0.3.14  # Optional - additional analysis features
 
 # Task Queue
 celery[redis]==5.4.0
